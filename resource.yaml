@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sfs-scheduler
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sfs-scheduler
+  namespace: sfs-scheduler
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sfs-scheduler
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - watch
+      - list
+  - apiGroups:
+      - ""
+    resources:
+      - events
+      - pods/binding
+    verbs:
+      - get
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sfs-scheduler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sfs-scheduler
+subjects:
+  - kind: ServiceAccount
+    name: sfs-scheduler
+    namespace: sfs-scheduler
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sfs-scheduler
+  namespace: sfs-scheduler
+spec:
+  containers:
+    - name: sfs-scheduler
+      image: onuryartasi/sfs-scheduler:latest
+      imagePullPolicy: Always
+  serviceAccountName: sfs-scheduler
+  serviceAccount: sfs-scheduler
